@@ -9,6 +9,7 @@ Low-latency clinical appointment booking system with full-duplex interaction and
 - Python 3.10+
 - Node.js 18+
 - [Gemini API Key](https://aistudio.google.com/)
+- [OpenAI API Key](https://platform.openai.com/api-keys)
 
 ### 2. Setup Environment Variables
 
