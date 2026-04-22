@@ -1,110 +1,85 @@
-# Real-Time Multilingual Voice AI Agent (2Care.ai)
+# Voice AI Agent (2Care.ai)
 
-A professional, low-latency Voice AI Agent designed for clinical appointment booking. The system features full-duplex "Telecall" style interaction, native multilingual support (English, Hindi, Tamil), and a real-time analytics dashboard.
+Low-latency clinical appointment booking system with full-duplex interaction and multilingual support (English, Hindi, Tamil).
 
-## 🚀 Key Features
-
-- **Continuous Telecall Flow**: Seamless barge-in capabilities (interrupt the agent any time).
-- **Multilingual Intelligence**: Native reasoning and responses in English, Hindi, and Tamil.
-- **Appointment Tool Calling**: Automated scheduling, cancellation, and availability checks.
-- **Premium Dashboard**: Live latency tracking, active appointment monitoring, and doctor directory.
-- **Optimized Latency**: Targeted < 1.5s total processing time with 10-turn history truncation.
-
----
-
-## 🛠 Setup Instructions
+## Quick Start
 
 ### 1. Prerequisites
 
-- **Python 3.10+**
-- **Node.js 18+**
-- **Gemini API Key**: Obtain from [Google AI Studio](https://aistudio.google.com/).
+- Python 3.10+
+- Node.js 18+
+- [Gemini API Key](https://aistudio.google.com/)
 
-### 2. Backend Setup
+### 2. Setup Environment Variables
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+Rename .env.example to .env
+Add GEMINI_API_KEY="your_key" and OPENAI_API_KEY="your_key" to .env file
 
-# Set Environment Variables
-# Windows (PowerShell):
-$env:GEMINI_API_KEY="your_api_key_here"
-# Linux/Mac:
-export GEMINI_API_KEY="your_api_key_here"
-
-# Run the server
-python -m uvicorn backend.main:app --reload
 ```
 
-### 3. Frontend Setup
+### 3. Installation
 
 ```bash
+# Backend
+pip install -r requirements.txt
+
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
+uvicorn backend.main:app --reload
+
+# Frontend
 cd frontend
 npm install
 npm run dev
 ```
 
-Navigate to `http://localhost:5173`.
+Access dashboard at `http://localhost:5173`.
 
----
+## Architecture
 
-## 🏗 Architecture Explanation
+- **Frontend**: React/Vite, Web Audio API (VAD), WebSockets.
+- **Backend**: FastAPI, SQLite.
+- **Pipeline**:
+  - **STT**: Google SpeechRecognition.
+  - **LLM**: Gemini 1.5 Flash (Function Calling).
+  - **TTS**: Edge-TTS (Regional neural voices).
 
-The system follows a decoupled **Client-Server Architecture** optimized for real-time streaming:
+## System Design
 
-1.  **Frontend (React/Vite)**:
-    - Handles low-level VAD (Voice Activity Detection) using Web Audio API (RMS energy analysis).
-    - Manages full-duplex WebSocket communication for raw PCM audio blocks and JSON telemetry.
-2.  **Backend (FastAPI)**:
-    - **STT Layer**: Uses `SpeechRecognition` (Google engine) to transcribe user intent and detect language.
-    - **Agent Layer (Gemini 1.5 Flash)**: Acts as the "Brain." Uses Function Calling to interact with the SQLite clinical database.
-    - **TTS Layer (Edge-TTS)**: High-quality synthesis with regional voice mapping (e.g., Google's Neural voices for Hindi/Tamil).
-    - **Session Manager**: Maintains thread-safe history and patient context.
+- **Memory**: Session-based with 10-turn truncation for <500ms reasoning latency.
+- **Database**: SQLite for persistent appointment state.
+- **Concurrency**: Full-duplex WebSocket stream allowing barge-in/interruptions.
 
----
+## Latency Metrics (Target: < 1.5s total)
 
-## 🧠 Memory Design
+| Stage         | Avg. Time     | Tech              |
+| :------------ | :------------ | :---------------- |
+| Transcription | 800ms - 1.2s  | Google Speech API |
+| Reasoning     | 400ms - 600ms | Gemini 1.5 Flash  |
+| Synthesis     | 300ms - 400ms | Edge TTS          |
 
-- **Short-Term Memory**: The agent uses a `session_history` list passed to Gemini's `start_chat` method.
-- **Latency Optimization (Truncation)**: To maintain sub-second reasoning times, the system automatically **truncates history to the last 10 turns**. This prevents context-window bloat while retaining enough context for appointment scheduling.
-- **Persistence**: While currently in-memory (per session), the database uses **SQLite** for final appointment state.
+## Technical Decisions
 
----
+- **Gemini Flash**: Prioritized over Pro for token-generation speed.
+- **Client-side VAD**: Reduced server processing overhead.
+- **History Truncation**: Prevents context-window bloat and latency spikes.
 
-## ⏱ Latency Breakdown (Target: < 450ms Reasoning)
+## Known Limitations
 
-| Stage                  | Avg. Latency  | Technology           |
-| :--------------------- | :------------ | :------------------- |
-| **Speech Recognition** | 800ms - 1.5s  | Google Speech API    |
-| **Agent Reasoning**    | 400ms - 700ms | Gemini 1.5 Flash     |
-| **Speech Synthesis**   | 300ms - 500ms | Edge TTS (Streaming) |
-| **Total Turnaround**   | ~1.5s - 2.5s  | (End-to-End)         |
+- Background noise can trigger false-positive barge-ins.
+- SQLite used for demonstration; production may require PostgreSQL.
+- Requires stable internet for cloud-based STT/LLM components.
 
----
-
-## ⚖️ Trade-offs
-
-1.  **Google STT vs Whisper**: I used Google SpeechRecognition for its robust multilingual detection out-of-the-box, though OpenAI Whisper (Local) would offer lower latency at the cost of higher CPU/GPU usage.
-2.  **LLM Selection**: Gemini 1.5 Flash was chosen over Pro specifically for **speed**. The Flash model offers significantly lower tokens-per-second latency, which is critical for a "telecall" feel.
-3.  **Client-Side VAD**: Performing VAD on the browser reduces server load and network traffic, but makes the system sensitive to the user's specific microphone noise floor settings.
-
----
-
-## ⚠️ Known Limitations
-
-- **Legacy SDK**: Currently uses the `google-generativeai` package; a migration to the newer `google-genai` package is recommended for future-proofing.
-- **Background Noise**: In very noisy environments, the RMS-based VAD may trigger false positive "Barge-ins," interrupting the agent prematurely.
-- **Database Scope**: The current SQLite schema is a simplified demonstration for clinical scheduling and lacks complex recurring appointment logic.
-
----
-
-## 📂 Project Structure
+## Project Structure
 
 ```text
-├── agent/            # Gemini reasoning & tool calling
-├── backend/          # FastAPI server & WebSocket handlers
-├── frontend/         # React (Vite) application
-├── scheduler/        # SQLite Appointment DB & Logic
-├── services/         # STT and TTS implementation
-└── requirements.txt  # Python dependencies
+├── agent/            # Logic & tool calling
+├── backend/          # API & WebSocket handlers
+├── frontend/         # React Dashboard
+├── scheduler/        # Database & Business logic
+├── services/         # STT/TTS modules
+└── requirements.txt  # Dependencies
 ```

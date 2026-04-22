@@ -9,10 +9,10 @@ from scheduler.appointment import (
     reschedule_appointment,
 )
 
-if 'GEMINI_API_KEY' not in os.environ:
-    print('Critical: GEMINI_API_KEY not set.')
+if "GEMINI_API_KEY" not in os.environ:
+    print("Critical: GEMINI_API_KEY not set.")
 
-genai.configure(api_key=os.environ.get('GEMINI_API_KEY', ''))
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
 # Agent configuration
 SYSTEM_INSTRUCTIONS = """You are a professional appointment booking agent for '2Care Clinic'.
@@ -38,69 +38,71 @@ tools = [
     reschedule_appointment,
 ]
 
+
 def get_agent_response(
     user_text: str,
     session_history: list,
-    user_lang: str = 'en',
-    patient_name: str = 'Valued Patient',
+    user_lang: str = "en",
+    patient_name: str = "Valued Patient",
 ) -> tuple[str, list]:
     # Maintain low latency by limiting context history
     MAX_HISTORY = 10
     if len(session_history) > MAX_HISTORY:
         session_history = session_history[-MAX_HISTORY:]
 
-    lang_map = {'en': 'English', 'hi': 'Hindi', 'ta': 'Tamil'}
-    target_lang = lang_map.get(user_lang, 'English')
+    lang_map = {"en": "English", "hi": "Hindi", "ta": "Tamil"}
+    target_lang = lang_map.get(user_lang, "English")
 
     context_instruction = (
-        f'{SYSTEM_INSTRUCTIONS}\n\n'
-        f'[Patient Name]: {patient_name}\n'
+        f"{SYSTEM_INSTRUCTIONS}\n\n" f"[Patient Name]: {patient_name}\n"
     )
 
     try:
         model = genai.GenerativeModel(
-            model_name='gemini-flash-latest',
+            model_name="gemini-flash-latest",
             tools=tools,
             system_instruction=context_instruction,
         )
 
         chat = model.start_chat(history=session_history)
-        
+
         # Format input message with language constraint
-        message = f'User Message: {user_text}\n\nLanguage Policy: Respond in {target_lang}.'
+        message = (
+            f"User Message: {user_text}\n\nLanguage Policy: Respond in {target_lang}."
+        )
         response = chat.send_message(message)
 
         # Process automated tool execution loop
         while True:
             function_call = None
-            if hasattr(response, 'parts') and response.parts:
+            if hasattr(response, "parts") and response.parts:
                 for part in response.parts:
-                    if hasattr(part, 'function_call') and part.function_call:
+                    if hasattr(part, "function_call") and part.function_call:
                         function_call = part.function_call
                         break
-            
+
             if not function_call:
                 break
 
             func_name = function_call.name
             func_args = {k: v for k, v in function_call.args.items()}
-            
+
             # Execute tool logic
-            if func_name == 'book_appointment':
+            if func_name == "book_appointment":
                 result = book_appointment(**func_args)
-            elif func_name == 'check_availability':
+            elif func_name == "check_availability":
                 result = check_availability(**func_args)
-            elif func_name == 'cancel_appointment':
+            elif func_name == "cancel_appointment":
                 result = cancel_appointment(**func_args)
-            elif func_name == 'reschedule_appointment':
+            elif func_name == "reschedule_appointment":
                 result = reschedule_appointment(**func_args)
             else:
-                result = 'Unsupported tool call.'
+                result = "Unsupported tool call."
 
             # Resume conversation with tool output
             response = chat.send_message(
                 genai.types.Part.from_function_response(
-                    name=func_name, response={'result': result}
+                    name=func_name, response={"result": result}
                 )
             )
 
@@ -108,8 +110,8 @@ def get_agent_response(
         return response.text, updated_history
 
     except Exception as e:
-        print(f'Error processing agent request: {e}')
+        print(f"Error processing agent request: {e}")
         return (
-            'I am currently experiencing service interruptions. Please try again shortly.',
+            "I am currently experiencing service interruptions. Please try again shortly.",
             session_history,
         )
