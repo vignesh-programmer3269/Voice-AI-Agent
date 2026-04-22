@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --primary: #6366f1;
+  --secondary: #8b5cf6;
+  --background: #0f172a;
+  --surface: rgba(30, 41, 59, 0.7);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --success: #10b981;
+  --danger: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.telecall-dashboard {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.telecall-header { text-align: center; margin-bottom: 0.5rem; }
+.telecall-header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #fff, var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  gap: 2rem;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+.main-col, .side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-border);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+}
+
+.panel-container {
+  width: 100%;
+}
+
+.panel-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Doctors Grid */
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.doctor-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.doctor-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.doctor-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+}
+
+.doc-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+.doc-spec { color: var(--text-secondary); font-size: 0.8rem; }
+
+/* Latency Table (Matching Reference Image) */
+.latency-table-wrapper {
+  background: #fdfdfd; /* White theme matching image */
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.latency-metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.latency-metrics-table th, .latency-metrics-table td {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.latency-metrics-table th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.total-row {
+  background: #ffffff;
+}
+
+.target-note {
+  margin-top: 1.5rem;
+  color: var(--text-primary);
+}
+
+.target-note strong {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.target-note p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Call Visualizer & Interface */
+.call-visualizer {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin: 2rem 0;
+  padding: 2rem;
+  border-radius: 100px;
+  background: rgba(0,0,0,0.2);
+}
+
+.orb-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  position: relative;
+  background: #334155;
+  transition: all 0.3s;
+}
+
+.orb-avatar.patient { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+.orb-avatar.agent { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
+
+.orb-avatar.glowing {
+  box-shadow: 0 0 40px rgba(255,255,255,0.4);
+  transform: scale(1.1);
+}
+
+.control-deck { display: flex; justify-content: center; margin-bottom: 2rem; }
+.telecall-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 1rem 2.5rem; border-radius: 40px;
+  font-size: 1.1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s;
+}
+.telecall-btn.success { background: var(--success); color: white; }
+.telecall-btn.danger { background: var(--danger); color: white; }
+
+.pill {
+  padding: 0.4rem 1.2rem; border-radius: 20px; font-weight: bold; font-size: 0.85rem;
+}
+.pill.listening { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+.pill.speaking { background: rgba(217, 70, 239, 0.2); color: #f0abfc; }
+
+/* Appointments Table */
+.appointments-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+  font-size: 0.9rem;
+}
+.appointments-table th {
+  text-align: left; padding: 0.5rem 1rem; color: var(--text-secondary);
+}
+.appointments-table td {
+  padding: 1rem; background: rgba(255,255,255,0.03);
+}
+
+.status-badge {
+  padding: 0.3rem 0.6rem; border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+}
+.status-badge.confirmed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+.log-window {
+  margin-top: 1rem; background: rgba(0,0,0,0.4); border-radius: 12px;
+  height: 140px; overflow-y: auto; padding: 1rem; font-family: monospace; font-size: 0.8rem;
+}
+.log-entry.error { color: var(--danger); }
+.log-entry.success { color: var(--success); }
+.log-entry.system { color: var(--text-secondary); }
